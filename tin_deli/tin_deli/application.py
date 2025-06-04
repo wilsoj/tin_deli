@@ -46,22 +46,24 @@ class Application(Tk):
         self.info = TabInfo(self)
         self.info.grid(column=2, row=2)
 
+    def update_tab_display(self, *args):
+
+        idx = self.selector.tabs.curselection()
+        idx = int(idx[0]) + 1
+
+        self.display.textbox.config(state='normal')
+        self.display.textbox.delete('1.0', END)
+        self.display.textbox.insert('1.0', m.TabModel().retrieve_entry(idx)["tab"])
+        self.display.textbox.config(state='disabled')
+
+        self.info.textbox.config(state='normal')
+        self.info.textbox.delete('1.0', END)
+        self.info.textbox.insert('1.0', str(m.TabModel().retrieve_entry(idx)))
+        self.info.textbox.config(state='disabled')
+
 
 class TabSelector(ttk.Frame):
     """Tab selection including search bar and list of tabs"""
-
-    def __init__(self, parent, *args, **kwargs):
-        super().__init__(parent, *args, **kwargs)
-
-        self.search_bar = SearchBar(self)
-        self.search_bar.grid(column=0, row=0, sticky=NSEW)
-
-        self.scroller = TabScroller(self)
-        self.scroller.grid(column=0, row=1, sticky=NW)
-
-
-class SearchBar(ttk.Frame):
-    """Search for tabs"""
 
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
@@ -72,23 +74,17 @@ class SearchBar(ttk.Frame):
         self.search = ttk.Entry(self, width=SEARCH_BAR_WIDTH)
         self.search.grid(column=1, row=0, sticky=EW)
 
-
-class TabScroller(ttk.Frame):
-    """Scrolls all tabs"""
-
-    def __init__(self, parent, *args , **kwargs):
-        super().__init__(parent, *args, **kwargs)
-
         self.tabs = Listbox(self, width=TABS_LIST_WIDTH, height=TABS_LIST_HEIGHT)
-        self.tabs.grid(column=1, row=0, pady=PADY)
+        self.tabs.bind('<<ListboxSelect>>', parent.update_tab_display)
+        self.tabs.grid(column=1, row=1, pady=PADY)
 
         self.scroll_bar_y = Scrollbar(self, orient=VERTICAL,
                                     command=self.tabs.yview)
-        self.scroll_bar_y.grid(column=0, row=0, sticky=NS)
+        self.scroll_bar_y.grid(column=0, row=1, sticky=NS)
 
         self.scroll_bar_x = Scrollbar(self, orient=HORIZONTAL,
                                     command=self.tabs.xview)
-        self.scroll_bar_x.grid(column=0, row=1, columnspan=2, sticky=EW)
+        self.scroll_bar_x.grid(column=0, row=2, columnspan=2, sticky=EW)
 
         self.tabs['yscrollcommand'] = self.scroll_bar_y.set
         self.tabs['xscrollcommand'] = self.scroll_bar_x.set
@@ -104,13 +100,13 @@ class TabDisplay(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-        self.contents = "This is text!"
-
         self.textbox = Text(self, width=TAB_DISPLAY_WIDTH,
                             height=TAB_DISPLAY_HEIGHT)
-        self.textbox.insert('1.0', self.contents)
+        self.textbox.insert('1.0', "This is text!")
         self.textbox.config(state='disabled')
         self.textbox.grid(padx=(0,PADX), pady=PADY)
+
+        self.textbox.bindtags((str(self.textbox), str(parent), "all"))
 
 
 class TabControls(ttk.Frame):
@@ -152,6 +148,8 @@ class TabInfo(ttk.Frame):
         self.textbox.insert('1.0', self.contents)
         self.textbox.config(state='disabled')
         self.textbox.grid(padx=(0,PADX), pady=PADY)
+
+        self.textbox.bindtags((str(self.textbox), str(parent), "all"))
 
 
 if __name__ == "__main__":
