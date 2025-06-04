@@ -21,6 +21,8 @@ SEARCH_BAR_WIDTH = 35
 
 BUTTON_WIDTH = 10
 
+MAX_NOTE_DISPLAY = 10
+
 
 class Application(Tk):
     """Application root window"""
@@ -50,16 +52,10 @@ class Application(Tk):
 
         idx = self.selector.tabs.curselection()
         idx = int(idx[0]) + 1
+        entry = m.TabModel().retrieve_entry(idx)
 
-        self.display.textbox.config(state='normal')
-        self.display.textbox.delete('1.0', END)
-        self.display.textbox.insert('1.0', m.TabModel().retrieve_entry(idx)["tab"])
-        self.display.textbox.config(state='disabled')
-
-        self.info.textbox.config(state='normal')
-        self.info.textbox.delete('1.0', END)
-        self.info.textbox.insert('1.0', str(m.TabModel().retrieve_entry(idx)))
-        self.info.textbox.config(state='disabled')
+        self.display.update_tab(entry)
+        self.info.update_info(entry)
 
 
 class TabSelector(ttk.Frame):
@@ -102,11 +98,23 @@ class TabDisplay(ttk.Frame):
 
         self.textbox = Text(self, width=TAB_DISPLAY_WIDTH,
                             height=TAB_DISPLAY_HEIGHT)
-        self.textbox.insert('1.0', "This is text!")
+        self.textbox.tag_add('all', '1.0', END)
+        self.textbox.tag_configure('all', justify='center')
         self.textbox.config(state='disabled')
         self.textbox.grid(padx=(0,PADX), pady=PADY)
 
         self.textbox.bindtags((str(self.textbox), str(parent), "all"))
+
+    def update_tab(self, entry):
+        self.textbox.config(state='normal')
+        self.textbox.delete('1.0', END)
+        self.textbox.insert('1.0', self.format_tab(entry["tab"]), ('all'))
+        self.textbox.config(state='disabled')
+
+    def format_tab(self, tab):
+        notes = tab.split(" ")
+        notes_split = [' '.join(notes[i:i+MAX_NOTE_DISPLAY]) for i in range(0, len(notes), 3)]
+        return "\n\n".join(notes_split)
 
 
 class TabControls(ttk.Frame):
@@ -141,15 +149,21 @@ class TabInfo(ttk.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-        self.contents = "This is also text!"
-
         self.textbox = Text(self, height=TAB_INFO_HEIGHT,
                             width=TAB_DISPLAY_WIDTH)
-        self.textbox.insert('1.0', self.contents)
         self.textbox.config(state='disabled')
         self.textbox.grid(padx=(0,PADX), pady=PADY)
 
         self.textbox.bindtags((str(self.textbox), str(parent), "all"))
+
+    def update_info(self, entry):
+        self.textbox.config(state='normal')
+        self.textbox.delete('1.0', END)
+        self.textbox.insert('1.0', 'Name: ' + entry['name'] + '\n\n'
+                                 + 'Creator: ' + entry['creator'] + '\n\n'
+                                 + 'Key: ' + entry['key'])
+        self.textbox.config(state='disabled')
+        
 
 
 if __name__ == "__main__":
