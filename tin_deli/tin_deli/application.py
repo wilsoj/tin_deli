@@ -101,9 +101,13 @@ class TabDisplay(ttk.Frame):
         self.textbox.tag_add('all', '1.0', END)
         self.textbox.tag_configure('all', justify='center')
         self.textbox.config(state='disabled')
-        self.textbox.grid(padx=(0,PADX), pady=PADY)
+        self.textbox.grid(column=0, row=0, padx=(0,PADX), pady=PADY)
 
         self.textbox.bindtags((str(self.textbox), str(parent), "all"))
+
+        self.scroll_bar = Scrollbar(self, orient=VERTICAL, command=self.textbox.yview)
+        self.textbox['yscrollcommand'] = self.scroll_bar.set
+        self.scroll_bar.grid(column=1, row=0, sticky=NS, pady=PADY)
 
     def update_tab(self, entry):
         self.textbox.config(state='normal')
@@ -113,7 +117,7 @@ class TabDisplay(ttk.Frame):
 
     def format_tab(self, tab):
         notes = tab.split(" ")
-        notes_split = [' '.join(notes[i:i+MAX_NOTE_DISPLAY]) for i in range(0, len(notes), 3)]
+        notes_split = [' '.join(notes[i:i+MAX_NOTE_DISPLAY]) for i in range(0, len(notes), MAX_NOTE_DISPLAY)]
         return "\n\n".join(notes_split)
 
 
