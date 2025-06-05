@@ -23,6 +23,8 @@ BUTTON_WIDTH = 10
 
 MAX_NOTE_DISPLAY = 10
 
+N_ENTRIES_INIT = 25
+
 
 class Application(Tk):
     """Application root window"""
@@ -33,6 +35,7 @@ class Application(Tk):
         self.title("Tin Deli")
         self.resizable(width=False, height=False)
 
+        self.active_tabs = m.TabModel().get_entries(0,N_ENTRIES_INIT)
         self.selector = TabSelector(self)
         self.selector.grid(column=0, row=0, rowspan=3, sticky=EW)
 
@@ -51,8 +54,8 @@ class Application(Tk):
     def update_tab_display(self, *args):
 
         idx = self.selector.tabs.curselection()
-        idx = int(idx[0]) + 1
-        entry = m.TabModel().retrieve_entry(idx)
+        idx = int(idx[0])
+        entry = self.active_tabs[idx]
 
         self.display.update_tab(entry)
         self.info.update_info(entry)
@@ -70,7 +73,11 @@ class TabSelector(ttk.Frame):
         self.search = ttk.Entry(self, width=SEARCH_BAR_WIDTH)
         self.search.grid(column=1, row=0, sticky=EW)
 
-        self.tabs = Listbox(self, width=TABS_LIST_WIDTH, height=TABS_LIST_HEIGHT)
+        self.active_tabs_list = StringVar(value=[t["name"] + " by " + t["creator"]
+                                           for t in parent.active_tabs])
+        self.tabs = Listbox(self, listvariable=self.active_tabs_list,
+                            width=TABS_LIST_WIDTH,
+                            height=TABS_LIST_HEIGHT)
         self.tabs.bind('<<ListboxSelect>>', parent.update_tab_display)
         self.tabs.grid(column=1, row=1, pady=PADY)
 
@@ -85,9 +92,9 @@ class TabSelector(ttk.Frame):
         self.tabs['yscrollcommand'] = self.scroll_bar_y.set
         self.tabs['xscrollcommand'] = self.scroll_bar_x.set
 
-
-        for name,creator in m.TabModel().retrieve_all_name_creators():
-            self.tabs.insert('end', name + ' by ' + creator + ' ')
+        
+        # for name,creator in m.TabModel().get_all_name_creators():
+        #     self.tabs.insert('end', name + ' by ' + creator + ' ')
 
 
 class TabDisplay(ttk.Frame):
@@ -144,7 +151,6 @@ class TabControls(ttk.Frame):
 
         self.practice = ttk.Button(self, text='practice', width=BUTTON_WIDTH)
         self.practice.grid(column=5, row=0)
-
 
 
 class TabInfo(ttk.Frame):

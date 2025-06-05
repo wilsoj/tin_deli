@@ -9,6 +9,7 @@
 ## Functionality *NOT* Included
 - Harmonica tabs only, no musical scales
 - Ability to make, edit, or save songs
+- Non-diatonic harmonica tabs
 
 ## Limitations
 - Run on a Windows 11 machine
