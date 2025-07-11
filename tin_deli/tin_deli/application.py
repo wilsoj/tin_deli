@@ -96,7 +96,6 @@ class TabSelector(ttk.Frame):
         # for name,creator in m.TabModel().get_all_name_creators():
         #     self.tabs.insert('end', name + ' by ' + creator + ' ')
 
-
 class TabDisplay(ttk.Frame):
     """Harmonica tab player"""
 
@@ -125,7 +124,7 @@ class TabDisplay(ttk.Frame):
     def format_tab(self, tab):
         notes = tab.split(" ")
         notes_split = [' '.join(notes[i:i+MAX_NOTE_DISPLAY]) for i in range(0, len(notes), MAX_NOTE_DISPLAY)]
-        return "\n\n".join(notes_split)
+        return "\n" + "\n\n".join(notes_split)
 
 
 class TabControls(ttk.Frame):
